@@ -27,17 +27,15 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 import {Navigation} from './src/Navigations';
 
-
 class App extends React.Component {
   render() {
     return (
-        <View style={{flex: 1}}>
-          <Navigation />
-        </View>
+      <View style={{flex: 1}}>
+        <Navigation />
+      </View>
     );
   }
 }
-
 
 const styles = StyleSheet.create({
   sectionContainer: {

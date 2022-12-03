@@ -1,5 +1,4 @@
-const jsdom = require('jsdom-jscore');
-const {JSDOM} = jsdom;
+import IDOMParser from 'advanced-html-parser';
 
 const Url = 'http://m.yinghuacd.com/';
 
@@ -8,11 +7,11 @@ export const Banners = fetch(Url)
     return response.text();
   })
   .then(text => {
-    const dom = new JSDOM(text);
-    const li = dom.window.document.querySelectorAll('.swipe #slider li');
+    const dom = IDOMParser.parse(text);
+    const li = dom.querySelectorAll('.swipe #slider li');
     let result = [];
     li.forEach(li => {
-      let imgUrl = li.querySelector('a img').src;
+      let imgUrl = li.querySelector('a img').getAttribute('src');
       result.push({
         title: li.textContent,
         image: imgUrl,
