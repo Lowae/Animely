@@ -3,16 +3,15 @@ import {
   Text,
   View,
   StyleSheet,
-  Image,
-  Dimensions,
   StatusBar,
   ImageBackground,
-  ScrollView,
   SectionList,
+  FlatList,
+  TouchableOpacity,
 } from 'react-native';
 import Swiper from 'react-native-swiper';
 
-import {Banners} from '../../utils/yinghua/Parser.js';
+import {HomeParser} from '../../utils/yinghua/Parser.js';
 import {ScreenWidth, ScreenHeight} from '../../utils/screens/ScreenUtils';
 
 export default class Home extends React.Component {
@@ -25,7 +24,7 @@ export default class Home extends React.Component {
   }
 
   componentDidMount() {
-    Banners.then(result => {
+    HomeParser.then(result => {
       this.setState({
         banners: result.banners,
         groups: result.groups,
@@ -33,7 +32,12 @@ export default class Home extends React.Component {
     });
   }
 
+  gotoDetails(navigation, detailUrl) {
+    navigation.navigate('Detail', {detailUrl: detailUrl});
+  }
+
   render() {
+    let {navigation} = this.props;
     return (
       <View style={styles.container}>
         <StatusBar backgroundColor={'transparent'} translucent={true} />
@@ -78,7 +82,6 @@ export default class Home extends React.Component {
             horizontal={true}
             removeClippedSubviews={false}>
             {this.state.banners.map((item, index) => {
-              console.log(item.image, index);
               return (
                 <View key={index}>
                   <ImageBackground
@@ -103,45 +106,26 @@ export default class Home extends React.Component {
         </View>
 
         <View style={{flex: 1}}>
-          <View
-            style={{
-              width: '100%',
-              flex: 1,
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-            }}>
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: 'bold',
-                marginTop: 32,
-                marginStart: 16,
-              }}>
-              新番连载
-            </Text>
-
-            <Text
-              style={{
-                fontSize: 14,
-                marginTop: 32,
-                marginEnd: 16,
-              }}>
-              更多>
-            </Text>
-          </View>
-          {this.state.groups.length > 0
-            ? console.log(this.state.groups)
-            : console.log('Empry Sections')}
           {this.state.groups.length > 0 ? (
             <SectionList
               sections={this.state.groups}
               keyExtractor={(anime, index) => {
                 return anime.name + index;
               }}
-              // renderItem={item => {
-              //   console.log('Item: ' + JSON.stringify(item));
-              // }}
-              renderItem={({item}) => <AnimeGroup anime={item} />}
+              renderItem={info => {
+                if (info.index === 0) {
+                  return (
+                    <AnimeSections
+                      sections={info.section}
+                      onPress={detailUrl =>
+                        this.gotoDetails(navigation, detailUrl)
+                      }
+                    />
+                  );
+                } else {
+                  return null;
+                }
+              }}
               renderSectionHeader={item => {
                 return (
                   <Text style={{fontSize: 18, padding: 12}}>
@@ -158,22 +142,76 @@ export default class Home extends React.Component {
     );
   }
 }
+class AnimeSections extends React.Component {
+  constructor(props) {
+    super(props);
+  }
 
-const AnimeGroup = ({anime}) => {
-  return (
-    <View style={{flex: 1, flexDirection: 'row'}}>
-      <Image
+  renderAnime = ({item}) => {
+    return (
+      <View
         style={{
-          marginBottom: 12,
-          width: ScreenWidth,
-          height: 200,
-          resizeMode: 'cover',
+          width: '45%',
+          height: (ScreenWidth * 0.45) / 0.72,
+          marginBottom: 36,
+        }}>
+        <TouchableOpacity
+          onPress={this.props.onPress.bind(this, item.detailUrl)}
+          activeOpacity={0.8}
+          style={{
+            overflow: 'hidden',
+            borderRadius: 16,
+            elevation: 4,
+          }}>
+          <ImageBackground
+            style={{height: '100%'}}
+            source={{uri: item.image}}
+          />
+          <Text
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              end: 0,
+              padding: 4,
+              fontSize: 11,
+              marginStart: 6,
+              borderTopLeftRadius: 12,
+              borderBottomRightRadius: 12,
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              marginTop: 6,
+              color: 'white',
+            }}>
+            {item.description}
+          </Text>
+        </TouchableOpacity>
+        <Text
+          style={{
+            fontSize: 13,
+            marginStart: 6,
+            marginTop: 6,
+            color: 'black',
+          }}>
+          {item.name}
+        </Text>
+      </View>
+    );
+  };
+
+  render() {
+    const animes = this.props.sections;
+    return (
+      <FlatList
+        data={animes.data}
+        numColumns={2}
+        columnWrapperStyle={{justifyContent: 'space-around'}}
+        keyExtractor={(item, index) => item + index}
+        renderItem={info => {
+          return this.renderAnime(info);
         }}
-        source={{uri: anime.image}}
       />
-    </View>
-  );
-};
+    );
+  }
+}
 
 const styles = StyleSheet.create({
   container: {flex: 1},

@@ -1,8 +1,9 @@
 import IDOMParser from 'advanced-html-parser';
+import {re} from '@babel/core/lib/vendor/import-meta-resolve';
 
 const Url = 'http://m.yinghuacd.com/';
 
-export const Banners = fetch(Url)
+export const HomeParser = fetch(Url)
   .then(response => {
     return response.text();
   })
@@ -30,19 +31,7 @@ export const Banners = fetch(Url)
       const second = uls[index * 2 + 1];
       const animes = [];
       const map = (element, key, parent) => {
-        const style = element
-          .querySelector('.imgblock')
-          .getAttribute('style')
-          .trimEnd();
-        const bgUrl = style.substring(
-          style.indexOf('(') + 2,
-          style.indexOf(')') - 1,
-        );
-        animes.push({
-          name: element.querySelector('.itemtext').textContent,
-          description: element.querySelector('.itemimgtext').textContent,
-          image: bgUrl,
-        });
+        animes.push(getAnimeInfoByElement(element));
       };
       first.querySelectorAll('.item').forEach(map);
       second.querySelectorAll('.item').forEach(map);
@@ -56,3 +45,65 @@ export const Banners = fetch(Url)
       groups: animeGroups,
     };
   });
+
+export const DetailParser = detailUrl =>
+  fetch(Url + detailUrl)
+    .then(response => {
+      return response.text();
+    })
+    .then(text => {
+      const dom = IDOMParser.parse(text);
+      const playlistsE = dom.querySelectorAll('#playlists li');
+      let playlists = [];
+      playlistsE.forEach((value, key, parent) => {
+        playlists.push({
+          episode: value.textContent,
+          playUrl: value.querySelector('a').getAttribute('href').trimEnd(),
+        });
+      });
+      const recommendList = [];
+      dom.querySelectorAll('.list ul .item').forEach((value, key, parent) => {
+        recommendList.push(getAnimeInfoByElement(value));
+      });
+      return {
+        cover: dom.querySelector('.list .show img').getAttribute('src'),
+        name: dom.querySelector('.list .show img').getAttribute('alt'),
+        star: dom.querySelector('.list .show .star').textContent,
+        description: dom.querySelector('.info').textContent,
+        playlists: playlists,
+        recommends: recommendList,
+      };
+    });
+
+export const VideoParser = playUrl =>
+  fetch(Url + playUrl)
+    .then(response => {
+      return response.text();
+    })
+    .then(text => {
+      const dom = IDOMParser.parse(text);
+      const attribute = dom
+        .querySelector('#play_1')
+        .getAttribute('onClick')
+        .trimEnd();
+      const playUrl = attribute.substring(
+        attribute.indexOf('(') + 2,
+        attribute.indexOf(')') - 1,
+      );
+
+      return playUrl.substring(0, playUrl.indexOf('$'));
+    });
+
+function getAnimeInfoByElement(element) {
+  const style = element
+    .querySelector('.imgblock')
+    .getAttribute('style')
+    .trimEnd();
+  const bgUrl = style.substring(style.indexOf('(') + 2, style.indexOf(')') - 1);
+  return {
+    name: element.querySelector('.itemtext').textContent,
+    description: element.querySelector('.itemimgtext').textContent,
+    image: bgUrl,
+    detailUrl: element.querySelector('.itemtext').getAttribute('href'),
+  };
+}
