@@ -143,7 +143,11 @@ export default class Home extends React.Component {
               // }}
               renderItem={({item}) => <AnimeGroup anime={item} />}
               renderSectionHeader={item => {
-                return <Text>{item.section.title}</Text>;
+                return (
+                  <Text style={{fontSize: 18, padding: 12}}>
+                    {item.section.title}
+                  </Text>
+                );
               }}
             />
           ) : (
@@ -159,7 +163,12 @@ const AnimeGroup = ({anime}) => {
   return (
     <View style={{flex: 1, flexDirection: 'row'}}>
       <Image
-        style={{width: ScreenWidth, height: 200, resizeMode: 'cover'}}
+        style={{
+          marginBottom: 12,
+          width: ScreenWidth,
+          height: 200,
+          resizeMode: 'cover',
+        }}
         source={{uri: anime.image}}
       />
     </View>
