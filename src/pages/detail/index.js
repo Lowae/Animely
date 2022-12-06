@@ -3,14 +3,15 @@ import {
   Button,
   FlatList,
   Image,
+  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import {DetailParser} from '../../utils/yinghua/Parser';
-import {ScreenHeight, ScreenWidth} from '../../utils/screens/ScreenUtils';
-import {BlurView} from '@react-native-community/blur';
+import {ScreenWidth} from '../../utils/screens/ScreenUtils';
 
 export default class Detail extends React.Component {
   constructor(props) {
@@ -39,69 +40,60 @@ export default class Detail extends React.Component {
 
   renderEpisode(item) {
     return (
-      <Text
-        onPress={() => this.gotoPlayer(item.playUrl)}
-        style={{
-          width: 72,
-          padding: 6,
-          borderWidth: 1,
-          marginEnd: 8,
-          borderRadius: 16,
-          textAlign: 'center',
-        }}>
-        {`第${item.episode}集`}
-      </Text>
+      <TouchableOpacity activeOpacity={0.8} style={styles.episode}>
+        <Text
+          style={{fontSize: 12}}
+          color="#B0C4DE"
+          onPress={() => this.gotoPlayer(item.playUrl)}>
+          {item.episode}
+        </Text>
+      </TouchableOpacity>
     );
   }
 
   render() {
     return (
-      <View style={styles.container}>
-        <StatusBar backgroundColor={'transparent'} translucent={true} />
-        <Image
-          key={'blurryImage'}
-          source={{uri: this.state.cover || null}}
-          style={styles.absolute}
-        />
-        {/* in terms of positioning and zIndex-ing everything before the BlurView will be blurred */}
-        <BlurView
-          style={styles.absolute}
-          blurType="light"
-          blurAmount={10}
-          reducedTransparencyFallbackColor="white"
-        />
-
-        <View style={{flexDirection: 'row', marginTop: 32}}>
-          <Image
-            source={{uri: this.state.cover || null}}
-            style={{
-              width: ScreenWidth * 0.4,
-              height: (ScreenWidth * 0.4) / 0.72,
-              borderRadius: 16,
-            }}
-          />
-          <View style={{marginStart: 12, flexShrink: 1}}>
-            <Text
-              style={{
-                fontSize: 18,
-                fontStyle: 'bold',
-                color: 'black',
-              }}>
-              {this.state.name}
-            </Text>
-          </View>
-        </View>
-        <Text style={{color: 'black', marginTop: 12}}>动漫介绍：</Text>
-        <Text style={{marginTop: 12}}>{this.state.description}</Text>
-        <Text style={{color: 'black', marginTop: 12}}>播放列表：</Text>
-        <FlatList
-          style={{marginTop: 12}}
-          horizontal={true}
-          data={this.state.playlists}
-          keyExtractor={item => item.episode + item.playUrl}
-          renderItem={({item}) => this.renderEpisode(item)}
-        />
-      </View>
+      <FlatList
+        style={styles.container}
+        contentContainerStyle={{
+          justifyContent: 'space-evenly',
+        }}
+        ListHeaderComponent={() => {
+          return (
+            <View>
+              <StatusBar backgroundColor={'transparent'} translucent={true} />
+              <View style={{flexDirection: 'row', marginTop: 32}}>
+                <Image
+                  source={{uri: this.state.cover || null}}
+                  style={{
+                    width: ScreenWidth * 0.4,
+                    height: (ScreenWidth * 0.4) / 0.72,
+                    borderRadius: 16,
+                  }}
+                />
+                <View style={{marginStart: 12, flexShrink: 1}}>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      fontStyle: 'bold',
+                      color: 'black',
+                    }}>
+                    {this.state.name}
+                  </Text>
+                </View>
+              </View>
+              <Text style={styles.blockTitle}>动漫介绍：</Text>
+              <Text style={{color: '#696969'}}>{this.state.description}</Text>
+              <Text style={styles.blockTitle}>播放列表：</Text>
+            </View>
+          );
+        }}
+        numColumns={6}
+        showsVerticalScrollIndicator={false}
+        data={this.state.playlists}
+        keyExtractor={item => item.episode + item.playUrl}
+        renderItem={({item}) => this.renderEpisode(item)}
+      />
     );
   }
 }
@@ -109,14 +101,23 @@ export default class Detail extends React.Component {
 const styles = StyleSheet.create({
   container: {
     paddingStart: 12,
-    backgroundColor: 'gray',
+    paddingEnd: 12,
+    backgroundColor: '#f5f5f5',
   },
-  absolute: {
-    position: 'absolute',
-    height: ScreenHeight,
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
+  episode: {
+    width: 52,
+    height: 33,
+    marginVertical: 4,
+    marginHorizontal: 4.5,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#DCDCDC',
+  },
+  blockTitle: {
+    color: 'black',
+    marginTop: 12,
+    fontWeight: 'bold',
+    marginBottom: 12,
   },
 });

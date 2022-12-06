@@ -48,6 +48,7 @@ export default class Player extends React.Component {
             source={{
               uri: this.state.playUrl,
             }}
+            controls={true}
             ref={ref => {
               this.player = ref;
             }} // Store reference

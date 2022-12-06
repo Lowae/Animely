@@ -13,7 +13,6 @@ export default function Navigation() {
       initialRouteName="Home"
       screenOptions={{
         headerMode: 'none',
-        animationEnabled: false,
       }}>
       <Stack.Screen name="Home" component={Home} />
       <Stack.Screen name="Detail" component={Detail} />

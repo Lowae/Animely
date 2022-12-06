@@ -2,6 +2,7 @@ import IDOMParser from 'advanced-html-parser';
 import {re} from '@babel/core/lib/vendor/import-meta-resolve';
 
 const Url = 'http://m.yinghuacd.com/';
+const pcUrl = 'http://www.yinghuacd.com';
 
 export const HomeParser = fetch(Url)
   .then(response => {
@@ -47,13 +48,13 @@ export const HomeParser = fetch(Url)
   });
 
 export const DetailParser = detailUrl =>
-  fetch(Url + detailUrl)
+  fetch(pcUrl + detailUrl)
     .then(response => {
       return response.text();
     })
     .then(text => {
       const dom = IDOMParser.parse(text);
-      const playlistsE = dom.querySelectorAll('#playlists li');
+      const playlistsE = dom.querySelectorAll('.movurl ul li');
       let playlists = [];
       playlistsE.forEach((value, key, parent) => {
         playlists.push({
@@ -62,14 +63,17 @@ export const DetailParser = detailUrl =>
         });
       });
       const recommendList = [];
-      dom.querySelectorAll('.list ul .item').forEach((value, key, parent) => {
-        recommendList.push(getAnimeInfoByElement(value));
+      dom.querySelectorAll('.pics li').forEach((element, key, parent) => {
+        recommendList.push({
+          name: element.querySelector('h2').textContent,
+          image: element.querySelector('a img').getAttribute('src'),
+          detailUrl: element.querySelector('a').getAttribute('href'),
+        });
       });
       return {
-        cover: dom.querySelector('.list .show img').getAttribute('src'),
-        name: dom.querySelector('.list .show img').getAttribute('alt'),
-        star: dom.querySelector('.list .show .star').textContent,
-        description: dom.querySelector('.info').textContent,
+        cover: dom.querySelector('.thumb img').getAttribute('src'),
+        name: dom.querySelector('.fire .rate h1').textContent,
+        description: dom.querySelector('.fire .info').textContent,
         playlists: playlists,
         recommends: recommendList,
       };
