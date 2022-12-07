@@ -14,6 +14,8 @@ import Swiper from 'react-native-swiper';
 
 import {HomeParser} from '../../utils/yinghua/Parser.js';
 import {ScreenWidth, ScreenHeight} from '../../utils/screens/ScreenUtils';
+import AnimeItem, {renderAnime} from '../animes/AnimeItem';
+import {gotoDetails} from '../../Navigations';
 
 export default class Home extends React.Component {
   constructor() {
@@ -29,11 +31,6 @@ export default class Home extends React.Component {
       });
     });
   }
-
-  gotoDetails(navigation, detailUrl) {
-    navigation.navigate('Detail', {detailUrl: detailUrl});
-  }
-
   renderSectionsHeader = () => {
     return (
       <View
@@ -122,47 +119,41 @@ export default class Home extends React.Component {
           translucent={true}
           barStyle={'dark-content'}
         />
-        {this.state.groups.length > 0 ? (
-          <SectionList
-            showsVerticalScrollIndicator={false}
-            style={{marginTop: 32}}
-            stickySectionHeadersEnabled={true}
-            ListHeaderComponent={this.renderSectionsHeader}
-            sections={this.state.groups}
-            keyExtractor={(anime, index) => {
-              return anime.name + index;
-            }}
-            renderItem={info => {
-              if (info.index === 0) {
-                return (
-                  <AnimeSections
-                    sections={info.section}
-                    onPress={detailUrl =>
-                      this.gotoDetails(navigation, detailUrl)
-                    }
-                  />
-                );
-              } else {
-                return null;
-              }
-            }}
-            renderSectionHeader={item => {
+        <SectionList
+          showsVerticalScrollIndicator={false}
+          style={{marginTop: 32}}
+          stickySectionHeadersEnabled={true}
+          ListHeaderComponent={this.renderSectionsHeader}
+          sections={this.state.groups}
+          keyExtractor={(anime, index) => {
+            return anime.name + index;
+          }}
+          renderItem={info => {
+            if (info.index === 0) {
               return (
-                <Text
-                  style={{
-                    color: 'black',
-                    fontSize: 18,
-                    padding: 12,
-                    backgroundColor: '#f5f5f5',
-                  }}>
-                  {item.section.title}
-                </Text>
+                <AnimeSections
+                  sections={info.section}
+                  onPress={detailUrl => gotoDetails(navigation, detailUrl)}
+                />
               );
-            }}
-          />
-        ) : (
-          console.log(`Empty: ${this.state.groups.length}`)
-        )}
+            } else {
+              return null;
+            }
+          }}
+          renderSectionHeader={item => {
+            return (
+              <Text
+                style={{
+                  color: 'black',
+                  fontSize: 18,
+                  padding: 12,
+                  backgroundColor: '#f5f5f5',
+                }}>
+                {item.section.title}
+              </Text>
+            );
+          }}
+        />
       </SafeAreaView>
     );
   }
@@ -172,56 +163,6 @@ class AnimeSections extends React.Component {
     super(props);
   }
 
-  renderAnime = ({item}) => {
-    return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: 'center',
-        }}>
-        <TouchableOpacity
-          onPress={this.props.onPress.bind(this, item.detailUrl)}
-          activeOpacity={0.8}
-          style={{
-            width: ScreenWidth * 0.3,
-            height: (ScreenWidth * 0.3) / 0.72,
-            overflow: 'hidden',
-            borderRadius: 16,
-            elevation: 4,
-          }}>
-          <ImageBackground
-            style={{height: '100%', backgroundColor: '#DCDCDC'}}
-            source={{uri: item.image}}
-          />
-          <Text
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              end: 0,
-              padding: 4,
-              fontSize: 11.5,
-              borderTopLeftRadius: 12,
-              borderBottomRightRadius: 12,
-              backgroundColor: 'rgba(0,0,0,0.5)',
-              color: 'white',
-            }}>
-            {item.description}
-          </Text>
-        </TouchableOpacity>
-        <Text
-          style={{
-            fontSize: 13,
-            marginStart: 6,
-            marginTop: 6,
-            color: 'black',
-            marginBottom: 6,
-          }}>
-          {item.name}
-        </Text>
-      </View>
-    );
-  };
-
   render() {
     const animes = this.props.sections;
     return (
@@ -230,7 +171,7 @@ class AnimeSections extends React.Component {
         numColumns={3}
         keyExtractor={(item, index) => item + index}
         renderItem={info => {
-          return this.renderAnime(info);
+          return <AnimeItem onPress={this.props.onPress} item={info.item} />;
         }}
       />
     );

@@ -42,7 +42,7 @@ export default class Player extends React.Component {
   render() {
     console.log(this.state.playUrl);
     return (
-      <View>
+      <View style={{width: '100%', height: '100%', backgroundColor: 'black'}}>
         {this.state.playUrl === '' ? null : (
           <Video
             source={{
@@ -52,8 +52,8 @@ export default class Player extends React.Component {
             ref={ref => {
               this.player = ref;
             }} // Store reference
+            style={{width: '100%', height: '100%'}}
             onError={Error => Alert.alert(Error)} // Callback when video cannot be loaded
-            style={{width: '100%', height: '100%', backgroundColor: 'black'}}
           />
         )}
       </View>

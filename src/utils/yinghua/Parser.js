@@ -1,10 +1,10 @@
 import IDOMParser from 'advanced-html-parser';
-import {re} from '@babel/core/lib/vendor/import-meta-resolve';
+import {fetchUrl} from '../http/HttpUtils';
 
-const Url = 'http://m.yinghuacd.com/';
+const Url = 'http://m.yinghuacd.com';
 const pcUrl = 'http://www.yinghuacd.com';
 
-export const HomeParser = fetch(Url)
+export const HomeParser = fetchUrl(Url)
   .then(response => {
     return response.text();
   })
@@ -48,7 +48,7 @@ export const HomeParser = fetch(Url)
   });
 
 export const DetailParser = detailUrl =>
-  fetch(pcUrl + detailUrl)
+  fetchUrl(pcUrl + detailUrl)
     .then(response => {
       return response.text();
     })
@@ -70,17 +70,37 @@ export const DetailParser = detailUrl =>
           detailUrl: element.querySelector('a').getAttribute('href'),
         });
       });
+      const tags = [];
+      dom
+        .querySelectorAll('.fire .rate .sinfo span')
+        .forEach((value, key, parent) => {
+          const label = value.querySelector('label').textContent;
+          switch (label) {
+            case '标签:':
+            case '类型:':
+              value.querySelectorAll('a').forEach((a, key1, parent1) => {
+                tags.push({
+                  tag: a.textContent,
+                  href: a.getAttribute('href'),
+                });
+              });
+              break;
+            default:
+              break;
+          }
+        });
       return {
         cover: dom.querySelector('.thumb img').getAttribute('src'),
         name: dom.querySelector('.fire .rate h1').textContent,
         description: dom.querySelector('.fire .info').textContent,
+        tags: tags,
         playlists: playlists,
         recommends: recommendList,
       };
     });
 
 export const VideoParser = playUrl =>
-  fetch(Url + playUrl)
+  fetchUrl(Url + playUrl)
     .then(response => {
       return response.text();
     })
@@ -96,6 +116,28 @@ export const VideoParser = playUrl =>
       );
 
       return playUrl.substring(0, playUrl.indexOf('$'));
+    });
+
+export const PageParser = pageUrl =>
+  fetchUrl(Url + pageUrl)
+    .then(response => {
+      return response.text();
+    })
+    .then(text => {
+      console.log(Url + pageUrl);
+      const dom = IDOMParser.parse(text);
+      const itemElements = dom.querySelectorAll('.list ul li');
+      const items = [];
+      itemElements.forEach((value, key, parent) => {
+        items.push(getAnimeInfoByElement(value));
+        console.log(
+          value.querySelector('.imgblock').getAttribute('style').toString(),
+        );
+      });
+      return {
+        title: dom.querySelector('.list .listtit').textContent,
+        data: items,
+      };
     });
 
 function getAnimeInfoByElement(element) {
