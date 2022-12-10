@@ -40,7 +40,6 @@ export default class Player extends React.Component {
   }
 
   render() {
-    console.log(this.state.playUrl);
     return (
       <View style={{width: '100%', height: '100%', backgroundColor: 'black'}}>
         {this.state.playUrl === '' ? null : (

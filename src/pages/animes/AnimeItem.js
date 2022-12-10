@@ -107,3 +107,4 @@ export default class AnimeItem extends React.Component {
 //     </View>
 //   );
 // };
+export class renderAnime {}

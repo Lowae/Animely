@@ -9,17 +9,19 @@ import {
   FlatList,
   TouchableOpacity,
   SafeAreaView,
+  Image,
 } from 'react-native';
 import Swiper from 'react-native-swiper';
 
 import {HomeParser} from '../../utils/yinghua/Parser.js';
 import {ScreenWidth, ScreenHeight} from '../../utils/screens/ScreenUtils';
 import AnimeItem, {renderAnime} from '../animes/AnimeItem';
-import {gotoDetails} from '../../Navigations';
+import {gotoDetails, gotoSearch} from '../../Navigations';
+import {ActivityIndicator, Appbar, TouchableRipple} from 'react-native-paper';
 
 export default class Home extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       banners: [],
       groups: [],
@@ -32,15 +34,19 @@ export default class Home extends React.Component {
     });
   }
   renderSectionsHeader = () => {
+    const {navigation} = this.props;
+    const {colors} = this.props.theme;
     return (
       <View
         style={{
           marginStart: 8,
           marginEnd: 8,
+          marginTop: 8,
           height: ScreenHeight * 0.25,
           alignSelf: 'center',
           overflow: 'hidden',
           borderRadius: 16,
+          backgroundColor: colors.background,
         }}>
         <Swiper
           autoplay={true}
@@ -83,26 +89,33 @@ export default class Home extends React.Component {
           removeClippedSubviews={false}>
           {this.state.banners.map((item, index) => {
             return (
-              <View key={index}>
-                <ImageBackground
+              <TouchableOpacity
+                key={index}
+                style={{overflow: 'hidden', borderRadius: 16, elevation: 8}}
+                onPress={() => gotoDetails(navigation, item.detailUrl)}
+                activeOpacity={0.85}>
+                <Image
                   style={{
                     height: '100%',
                     justifyContent: 'flex-end',
                   }}
                   resizeMode="cover"
-                  source={{uri: item.image}}>
-                  <Text
-                    style={{
-                      color: '#FFF0F5',
-                      fontSize: 18,
-                      fontWeight: 'bold',
-                      marginStart: 12,
-                      marginBottom: 8,
-                    }}>
-                    {item.title}
-                  </Text>
-                </ImageBackground>
-              </View>
+                  source={{uri: item.image}}
+                />
+                <Text
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    start: 0,
+                    color: '#FFF0F5',
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                    marginStart: 12,
+                    marginBottom: 8,
+                  }}>
+                  {item.title}
+                </Text>
+              </TouchableOpacity>
             );
           })}
         </Swiper>
@@ -111,49 +124,77 @@ export default class Home extends React.Component {
   };
 
   render() {
-    let {navigation} = this.props;
+    let {navigation, theme} = this.props;
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView
+        style={[styles.container, {backgroundColor: theme.colors.background}]}>
         <StatusBar
           backgroundColor={'transparent'}
           translucent={true}
           barStyle={'dark-content'}
         />
-        <SectionList
-          showsVerticalScrollIndicator={false}
-          style={{marginTop: 32}}
-          stickySectionHeadersEnabled={true}
-          ListHeaderComponent={this.renderSectionsHeader}
-          sections={this.state.groups}
-          keyExtractor={(anime, index) => {
-            return anime.name + index;
-          }}
-          renderItem={info => {
-            if (info.index === 0) {
+        <Appbar
+          elevated={true}
+          style={{
+            height: 86,
+            backgroundColor: theme.colors.elevation.level2,
+            paddingTop: 32,
+          }}>
+          <Appbar.Content
+            title="Animely"
+            color={theme.colors.onBackground}
+            style={{marginStart: 8}}
+          />
+          <Appbar.Action
+            color={theme.colors.onBackground}
+            icon="magnify"
+            onPress={() => gotoSearch(navigation)}
+          />
+        </Appbar>
+        {this.state.groups.length === 0 ? (
+          <ActivityIndicator
+            style={{flex: 1}}
+            theme={theme}
+            animating={true}
+            hidesWhenStopped={false}
+            size="large"
+          />
+        ) : (
+          <SectionList
+            showsVerticalScrollIndicator={false}
+            stickySectionHeadersEnabled={true}
+            ListHeaderComponent={this.renderSectionsHeader}
+            sections={this.state.groups}
+            keyExtractor={(anime, index) => {
+              return anime.name + index;
+            }}
+            renderItem={info => {
+              if (info.index === 0) {
+                return (
+                  <AnimeSections
+                    sections={info.section}
+                    onPress={detailUrl => gotoDetails(navigation, detailUrl)}
+                  />
+                );
+              } else {
+                return null;
+              }
+            }}
+            renderSectionHeader={item => {
               return (
-                <AnimeSections
-                  sections={info.section}
-                  onPress={detailUrl => gotoDetails(navigation, detailUrl)}
-                />
+                <Text
+                  style={{
+                    color: theme.colors.onBackground,
+                    fontSize: 18,
+                    padding: 12,
+                    backgroundColor: theme.colors.background,
+                  }}>
+                  {item.section.title}
+                </Text>
               );
-            } else {
-              return null;
-            }
-          }}
-          renderSectionHeader={item => {
-            return (
-              <Text
-                style={{
-                  color: 'black',
-                  fontSize: 18,
-                  padding: 12,
-                  backgroundColor: '#f5f5f5',
-                }}>
-                {item.section.title}
-              </Text>
-            );
-          }}
-        />
+            }}
+          />
+        )}
       </SafeAreaView>
     );
   }

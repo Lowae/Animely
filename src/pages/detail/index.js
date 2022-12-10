@@ -12,9 +12,10 @@ import {
 } from 'react-native';
 import {DetailParser} from '../../utils/yinghua/Parser';
 import {ScreenWidth} from '../../utils/screens/ScreenUtils';
-import Collapsible from 'react-native-collapsible';
-import LinearGradient from 'react-native-linear-gradient';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import {gotoTagPage} from '../../Navigations';
+import {ActivityIndicator, Appbar, Chip} from 'react-native-paper';
+import {FlatGrid} from 'react-native-super-grid';
+import ReadMore from '@fawazahmed/react-native-read-more';
 
 export default class Detail extends React.Component {
   constructor(props) {
@@ -36,104 +37,112 @@ export default class Detail extends React.Component {
   }
 
   gotoPlayer(playUrl) {
-    console.log('gotoPlayer: ' + playUrl);
     const {navigation} = this.props;
     navigation.navigate('Player', {playUrl: playUrl});
   }
 
-  gotoTagPage(tagUrl) {
-    console.log('gotoTagPage: ' + tagUrl);
-    const {navigation} = this.props;
-    navigation.navigate('Animes', {tagUrl: tagUrl});
-  }
-
   renderEpisode(item) {
     return (
-      <TouchableOpacity activeOpacity={0.8} style={styles.episode}>
-        <Text
-          style={{fontSize: 12}}
-          color="#B0C4DE"
-          onPress={() => this.gotoPlayer(item.playUrl)}>
-          {item.episode}
-        </Text>
-      </TouchableOpacity>
+      <Chip
+        compact={true}
+        mode={'outlined'}
+        theme={this.props.theme}
+        elevated
+        style={{padding: 0, height: 36, justifyContent: 'center'}}
+        onPress={() => this.gotoPlayer(item.playUrl)}>
+        {item.episode}
+      </Chip>
     );
   }
-
   renderTags(item) {
+    const {navigation, theme} = this.props;
     return (
-      <TouchableOpacity
-        activeOpacity={0.6}
-        onPress={() => this.gotoTagPage(item.href)}
+      <Chip
+        mode={'outlined'}
+        theme={theme}
+        onPress={() => gotoTagPage(navigation, item.href)}
+        textStyle={{
+          fontSize: 12,
+          textAlign: 'center',
+        }}
         style={{
-          marginEnd: 8,
-          paddingStart: 8,
-          paddingEnd: 8,
-          backgroundColor: 'rgb(238,238,240)',
-          borderWidth: 1,
-          borderRadius: 8,
-          borderColor: 'rgb(228,228,236)',
+          margin: 3,
+          paddingEnd: 1,
+          paddingBottom: 1,
+          borderRadius: 16,
         }}>
-        <Text style={{color: '#171717'}}>{item.tag}</Text>
-      </TouchableOpacity>
+        {item.tag}
+      </Chip>
     );
   }
 
   render() {
-    return (
-      <FlatList
-        style={styles.container}
-        contentContainerStyle={{
-          justifyContent: 'space-evenly',
-        }}
-        ListHeaderComponent={() => {
-          return (
-            <View>
-              <StatusBar backgroundColor={'transparent'} translucent={true} />
-              <View style={{marginTop: 32, alignItems: 'center'}}>
-                <Image
-                  source={{uri: this.state.cover || null}}
-                  style={{
-                    width: ScreenWidth * 0.4,
-                    height: (ScreenWidth * 0.4) / 0.72,
-                    borderRadius: 16,
-                  }}
-                />
-                <Text
-                  style={{
-                    marginTop: 12,
-                    fontSize: 18,
-                    fontStyle: 'bold',
-                    color: 'black',
-                    textAlign: 'center',
-                  }}>
-                  {this.state.name}
-                </Text>
-                <FlatList
-                  style={{marginTop: 12}}
-                  horizontal={true}
-                  data={this.state.tags}
-                  keyExtractor={item => item.tag + item.href}
-                  renderItem={({item}) => this.renderTags(item)}
-                />
-              </View>
-              <Text style={styles.blockTitle}>动漫介绍：</Text>
-              <CollapsibleText description={this.state.description} />
-              <Text style={styles.blockTitle}>播放列表：</Text>
-            </View>
-          );
-        }}
-        numColumns={6}
-        showsVerticalScrollIndicator={false}
-        data={this.state.playlists}
-        keyExtractor={item => item.episode + item.playUrl}
-        renderItem={({item}) => this.renderEpisode(item)}
+    const {navigation, theme} = this.props;
+    return this.state.cover === '' ? (
+      <ActivityIndicator
+        style={{flex: 1}}
+        theme={theme}
+        animating={true}
+        hidesWhenStopped={false}
+        size="large"
       />
+    ) : (
+      <ScrollView>
+        <View>
+          <StatusBar
+            backgroundColor={'transparent'}
+            translucent={true}
+            barStyle={'dark-content'}
+          />
+          <View style={{marginTop: 48, alignItems: 'center'}}>
+            <Image
+              source={{uri: this.state.cover || null}}
+              style={{
+                width: ScreenWidth * 0.4,
+                height: (ScreenWidth * 0.4) / 0.72,
+                borderRadius: 16,
+              }}
+            />
+            <Text
+              style={{
+                marginTop: 12,
+                fontSize: 18,
+                fontStyle: 'bold',
+                color: 'black',
+                textAlign: 'center',
+              }}>
+              {this.state.name}
+            </Text>
+            <FlatList
+              showsHorizontalScrollIndicator={false}
+              style={{marginTop: 6}}
+              horizontal={true}
+              data={this.state.tags}
+              keyExtractor={item => item.tag + item.href}
+              renderItem={({item}) => this.renderTags(item)}
+            />
+          </View>
+          <Text style={styles.blockTitle}>动漫介绍：</Text>
+          <CollapsibleText description={this.state.description} theme={theme} />
+          <Text style={styles.blockTitle}>播放列表：</Text>
+          <FlatGrid
+            showsHorizontalScrollIndicator={false}
+            staticDimension={200}
+            itemDimension={36}
+            style={{height: 200, flex: 1}}
+            horizontal={true}
+            showsVerticalScrollIndicator={false}
+            data={this.state.playlists}
+            keyExtractor={item => item.episode + item.playUrl}
+            renderItem={({item}) => this.renderEpisode(item)}
+          />
+        </View>
+      </ScrollView>
     );
   }
 }
 
-const CollapsibleText = ({description}) => {
+const CollapsibleText = ({description, theme}) => {
   const [collapsed, setCollapsed] = React.useState(true);
 
   const toggle = () => {
@@ -141,36 +150,21 @@ const CollapsibleText = ({description}) => {
   };
 
   return (
-    <View>
-      <Collapsible collapsed={collapsed} collapsedHeight={124}>
-        <Text>{description}</Text>
-      </Collapsible>
-      {collapsed && (
-        <TouchableOpacity
-          style={{
-            height: 32,
-            bottom: -12,
-            width: '100%',
-            position: 'absolute',
-            alignContent: 'center',
-          }}
-          onPress={toggle}>
-          <LinearGradient
-            colors={['rgba(255,255,255,0.3)', 'rgba(255,255,255, 1)']}>
-            <View style={{alignItems: 'center', marginTop: 8}}>
-              <Ionicons size={20} color={'gray'} name={'chevron-down'} />
-            </View>
-          </LinearGradient>
-        </TouchableOpacity>
-      )}
+    <View style={{marginStart: 12, marginEnd: 12}}>
+      <ReadMore
+        numberOfLines={4}
+        seeMoreText={'展开'}
+        seeMoreStyle={{color: theme.colors.onBackground}}
+        seeLessText={'收起'}
+        seeLessStyle={{colors: theme.colors.onBackground}}>
+        {description}
+      </ReadMore>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    paddingStart: 12,
-    paddingEnd: 12,
     backgroundColor: '#ffffff',
   },
   episode: {
@@ -186,6 +180,8 @@ const styles = StyleSheet.create({
   blockTitle: {
     color: 'black',
     marginTop: 12,
+    marginStart: 12,
+    marginEnd: 12,
     fontWeight: 'bold',
     marginBottom: 12,
   },

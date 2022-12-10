@@ -3,6 +3,8 @@ import {FlatList, SafeAreaView, StyleSheet, Text, View} from 'react-native';
 import {PageParser} from '../../utils/yinghua/Parser';
 import AnimeItem from './AnimeItem';
 import {gotoDetails} from '../../Navigations';
+import {ActivityIndicator} from 'react-native-paper';
+import AnimeList from './AnimeList';
 
 // Later on in your styles.
 const styles = StyleSheet.create({
@@ -18,6 +20,7 @@ export default class Animes extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      isLoadFinished: false,
       title: '',
       data: [],
     };
@@ -25,40 +28,33 @@ export default class Animes extends React.Component {
     const {tagUrl} = route.params;
     PageParser(tagUrl).then(result => {
       this.setState({
+        isLoadFinished: true,
         title: result.title,
         data: result.data,
       });
-      console.log(tagUrl);
       return result;
     });
   }
 
   render() {
-    const {navigation} = this.props;
+    const {navigation, theme} = this.props;
     return (
-      <SafeAreaView>
-        <Text
-          style={{
-            color: 'black',
-            fontSize: 18,
-            padding: 12,
-            marginTop: 12,
-            backgroundColor: '#f5f5f5',
-          }}>
-          {this.state.title}
-        </Text>
-        <FlatList
-          numColumns={3}
-          data={this.state.data}
-          renderItem={info => {
-            return (
-              <AnimeItem
-                onPress={() => gotoDetails(navigation, info.item.detailUrl)}
-                item={info.item}
-              />
-            );
-          }}
-        />
+      <SafeAreaView style={{flex: 1}}>
+        {!this.state.isLoadFinished ? (
+          <ActivityIndicator
+            style={{flex: 1}}
+            theme={theme}
+            animating={true}
+            hidesWhenStopped={false}
+            size="large"
+          />
+        ) : (
+          <AnimeList
+            navigation={navigation}
+            title={this.state.title}
+            data={this.state.data}
+          />
+        )}
       </SafeAreaView>
     );
   }

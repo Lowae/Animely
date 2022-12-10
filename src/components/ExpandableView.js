@@ -11,8 +11,5 @@ const ExpandableView = ({expanded = false}) => {
       useNativeDriver: false,
     }).start();
   }, [expanded, height]);
-
-  // console.log('rerendered');
-
   return <Animated.View style={{height, backgroundColor: 'orange'}} />;
 };

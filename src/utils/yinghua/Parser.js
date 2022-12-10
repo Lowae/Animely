@@ -17,6 +17,7 @@ export const HomeParser = fetchUrl(Url)
       banner.push({
         title: li.textContent,
         image: imgUrl,
+        detailUrl: li.querySelector('a').getAttribute('href'),
       });
     });
 
@@ -124,15 +125,11 @@ export const PageParser = pageUrl =>
       return response.text();
     })
     .then(text => {
-      console.log(Url + pageUrl);
       const dom = IDOMParser.parse(text);
       const itemElements = dom.querySelectorAll('.list ul li');
       const items = [];
       itemElements.forEach((value, key, parent) => {
         items.push(getAnimeInfoByElement(value));
-        console.log(
-          value.querySelector('.imgblock').getAttribute('style').toString(),
-        );
       });
       return {
         title: dom.querySelector('.list .listtit').textContent,
