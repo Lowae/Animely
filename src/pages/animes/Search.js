@@ -1,31 +1,33 @@
 import {Alert, Keyboard, SafeAreaView} from 'react-native';
-import {Appbar, Searchbar} from 'react-native-paper';
+import {ActivityIndicator, Appbar, Searchbar} from 'react-native-paper';
 import * as React from 'react';
 import {useEffect, useRef} from 'react';
+import {SearchParser} from '../../utils/yinghua/Parser';
+import AnimeList from './AnimeList';
 
 const Search = ({navigation, theme}) => {
   const [query, setQuery] = React.useState('');
-  const ref = useRef(null);
 
-  useEffect(() => {
-    const handleClick = event => {
-    };
+  const [searchResult, setSearchResult] = React.useState({
+    title: '',
+    data: [],
+  });
+  const [isSearching, setIsSearching] = React.useState(false);
 
-    const element = ref.current;
-
-    Keyboard.addListener('keyboardDidHide', _keyboardDidHide);
-
-    return () => {
-      Keyboard.removeAllListeners('keyboardDidHide');
-    };
-  }, []);
-
-  const _keyboardDidHide = event => {
-    console.log(JSON.stringify(event));
+  // search/ddddd/
+  const SearchAction = keywords => {
+    setIsSearching(true);
+    SearchParser('/search/' + keywords).then(r => {
+      setIsSearching(false);
+      setSearchResult({
+        title: r.title,
+        data: r.data,
+      });
+    });
   };
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{flex: 1}}>
       <Appbar
         elevated={true}
         style={{
@@ -34,15 +36,20 @@ const Search = ({navigation, theme}) => {
           paddingTop: 36,
         }}>
         <Searchbar
-          ref={ref}
           placeholder="搜索番剧~"
           elevation={0}
           value={query}
+          onSubmitEditing={() => SearchAction(query)}
           onChangeText={setQuery}
           onIconPress={() => navigation.goBack()}
           icon={{source: 'arrow-left', direction: 'auto'}}
         />
       </Appbar>
+      {isSearching === true ? (
+        <ActivityIndicator size={'large'} theme={theme} style={{flex: 1}} />
+      ) : (
+        <AnimeList navigation={navigation} data={searchResult.data} />
+      )}
     </SafeAreaView>
   );
 };

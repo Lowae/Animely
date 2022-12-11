@@ -3,7 +3,7 @@ import {FlatList, SafeAreaView, StyleSheet, Text, View} from 'react-native';
 import {PageParser} from '../../utils/yinghua/Parser';
 import AnimeItem from './AnimeItem';
 import {gotoDetails} from '../../Navigations';
-import {ActivityIndicator} from 'react-native-paper';
+import {ActivityIndicator, Appbar, Searchbar} from 'react-native-paper';
 import AnimeList from './AnimeList';
 
 // Later on in your styles.
@@ -49,11 +49,23 @@ export default class Animes extends React.Component {
             size="large"
           />
         ) : (
-          <AnimeList
-            navigation={navigation}
-            title={this.state.title}
-            data={this.state.data}
-          />
+          <View>
+            <Appbar
+              elevated={true}
+              style={{
+                height: 86,
+                backgroundColor: theme.colors.elevation.level2,
+                paddingTop: 36,
+              }}>
+              <Appbar.BackAction onPress={() => navigation.goBack()} />
+              <Appbar.Content
+                title={this.state.title}
+                color={theme.colors.onBackground}
+                style={{marginStart: 8}}
+              />
+            </Appbar>
+            <AnimeList navigation={navigation} data={this.state.data} />
+          </View>
         )}
       </SafeAreaView>
     );

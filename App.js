@@ -6,13 +6,10 @@
  * @flow strict-local
  */
 
+import {NavigationContainer} from '@react-navigation/native';
 import React from 'react';
-import {
-  adaptNavigationTheme,
-  Provider as PaperProvider,
-} from 'react-native-paper';
 
-import {NavigationContainer, DefaultTheme} from '@react-navigation/native';
+import {DefaultTheme, Provider as PaperProvider} from 'react-native-paper';
 import Navigation from './src/Navigations';
 import {MD3Theme} from 'react-native-paper';
 

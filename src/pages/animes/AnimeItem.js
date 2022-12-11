@@ -12,6 +12,7 @@ export default class AnimeItem extends React.Component {
       <View
         style={{
           flex: 1,
+          justifyContent: 'flex-start',
           alignItems: 'center',
         }}>
         <TouchableOpacity

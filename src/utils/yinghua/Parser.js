@@ -124,18 +124,29 @@ export const PageParser = pageUrl =>
     .then(response => {
       return response.text();
     })
-    .then(text => {
-      const dom = IDOMParser.parse(text);
-      const itemElements = dom.querySelectorAll('.list ul li');
-      const items = [];
-      itemElements.forEach((value, key, parent) => {
-        items.push(getAnimeInfoByElement(value));
-      });
-      return {
-        title: dom.querySelector('.list .listtit').textContent,
-        data: items,
-      };
-    });
+    .then(text => pageParser(text));
+
+export function SearchParser(searchUrl) {
+  console.log(Url + searchUrl);
+  return fetchUrl(Url + searchUrl)
+    .then(response => {
+      return response.text();
+    })
+    .then(text => pageParser(text));
+}
+
+function pageParser(text: string) {
+  const dom = IDOMParser.parse(text);
+  const itemElements = dom.querySelectorAll('.list ul li');
+  const items = [];
+  itemElements.forEach((value, key, parent) => {
+    items.push(getAnimeInfoByElement(value));
+  });
+  return {
+    title: dom.querySelector('.list .listtit').textContent,
+    data: items,
+  };
+}
 
 function getAnimeInfoByElement(element) {
   const style = element

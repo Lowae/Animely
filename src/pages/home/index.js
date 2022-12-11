@@ -16,7 +16,7 @@ import Swiper from 'react-native-swiper';
 import {HomeParser} from '../../utils/yinghua/Parser.js';
 import {ScreenWidth, ScreenHeight} from '../../utils/screens/ScreenUtils';
 import AnimeItem, {renderAnime} from '../animes/AnimeItem';
-import {gotoDetails, gotoSearch} from '../../Navigations';
+import {gotoDetails, gotoSearch, gotoSetting} from '../../Navigations';
 import {ActivityIndicator, Appbar, TouchableRipple} from 'react-native-paper';
 
 export default class Home extends React.Component {
@@ -91,7 +91,6 @@ export default class Home extends React.Component {
             return (
               <TouchableOpacity
                 key={index}
-                style={{overflow: 'hidden', borderRadius: 16, elevation: 8}}
                 onPress={() => gotoDetails(navigation, item.detailUrl)}
                 activeOpacity={0.85}>
                 <Image
@@ -140,6 +139,11 @@ export default class Home extends React.Component {
             backgroundColor: theme.colors.elevation.level2,
             paddingTop: 32,
           }}>
+          <Appbar.Action
+            color={theme.colors.onBackground}
+            icon="menu"
+            onPress={() => {}}
+          />
           <Appbar.Content
             title="Animely"
             color={theme.colors.onBackground}
@@ -149,6 +153,11 @@ export default class Home extends React.Component {
             color={theme.colors.onBackground}
             icon="magnify"
             onPress={() => gotoSearch(navigation)}
+          />
+          <Appbar.Action
+            color={theme.colors.onBackground}
+            icon="cog-outline"
+            onPress={() => gotoSetting(navigation)}
           />
         </Appbar>
         {this.state.groups.length === 0 ? (
