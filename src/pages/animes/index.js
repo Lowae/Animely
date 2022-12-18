@@ -1,22 +1,14 @@
 import React from 'react';
-import {FlatList, SafeAreaView, StyleSheet, Text, View} from 'react-native';
-import {PageParser} from '../../utils/yinghua/Parser';
-import AnimeItem from './AnimeItem';
-import {gotoDetails} from '../../Navigations';
+import {SafeAreaView, View} from 'react-native';
 import {ActivityIndicator, Appbar, Searchbar} from 'react-native-paper';
 import AnimeList from './AnimeList';
+import {connect} from 'react-redux';
+import {
+  mapFromParserToProps,
+  mapSourceToParserProps,
+} from '../../redux/reducers/DataSource';
 
-// Later on in your styles.
-const styles = StyleSheet.create({
-  backgroundVideo: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
-  },
-});
-export default class Animes extends React.Component {
+class Animes extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -26,7 +18,7 @@ export default class Animes extends React.Component {
     };
     const {route} = this.props;
     const {tagUrl} = route.params;
-    PageParser(tagUrl).then(result => {
+    this.props.source.parser.pageParser(tagUrl).then(result => {
       this.setState({
         isLoadFinished: true,
         title: result.title,
@@ -71,3 +63,4 @@ export default class Animes extends React.Component {
     );
   }
 }
+export default connect(mapFromParserToProps, null)(Animes);

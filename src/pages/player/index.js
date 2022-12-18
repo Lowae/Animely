@@ -1,61 +1,87 @@
 import React from 'react';
-import {
-  Text,
-  View,
-  StyleSheet,
-  StatusBar,
-  ImageBackground,
-  SectionList,
-  FlatList,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
-import {VideoParser} from '../../utils/yinghua/Parser';
+import {View, StyleSheet, Alert} from 'react-native';
 import Video from 'react-native-video';
+import {connect} from 'react-redux';
+import {mapFromParserToProps} from '../../redux/reducers/DataSource';
+import WebView from 'react-native-webview';
+import {UserAgent} from '../../utils/http/HttpUtils';
 
-// Later on in your styles..
-const styles = StyleSheet.create({
-  backgroundVideo: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
-  },
-});
-export default class Player extends React.Component {
+class Player extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       playUrl: '',
     };
+  }
+
+  componentDidMount() {
     const {route} = this.props;
-    const {playUrl} = route.params;
-    VideoParser(playUrl).then(result => {
+    const {originUrl} = route.params;
+    if (originUrl.endsWith('.m3u8')) {
       this.setState({
-        playUrl: result,
+        playUrl: originUrl,
       });
-      return result;
-    });
+    } else {
+      this.props.source.parser.videoParser(originUrl).then(result => {
+        this.setState({
+          playUrl: result.playUrl,
+        });
+        return result;
+      });
+    }
   }
 
   render() {
+    console.log('Video: ' + this.state.playUrl);
     return (
       <View style={{width: '100%', height: '100%', backgroundColor: 'black'}}>
         {this.state.playUrl === '' ? null : (
-          <Video
-            source={{
-              uri: this.state.playUrl,
-            }}
-            controls={true}
-            ref={ref => {
-              this.player = ref;
-            }} // Store reference
-            style={{width: '100%', height: '100%'}}
-            onError={Error => Alert.alert(Error)} // Callback when video cannot be loaded
-          />
+          <PlayerInner playUrl={this.state.playUrl} />
         )}
       </View>
     );
   }
 }
+
+const PlayerInner = ({playUrl}) => {
+  if (playUrl === '') {
+    return null;
+  }
+  const urlSuffix = playUrl.split('.').pop();
+  if (urlSuffix === 'm3u8' || urlSuffix === 'mp4') {
+    return (
+      <Video
+        source={{
+          uri: playUrl,
+        }}
+        controls={true}
+        ref={ref => {
+          this.player = ref;
+        }} // Store reference
+        style={{width: '100%', height: '100%'}}
+        onError={Error => Alert.alert(Error)} // Callback when video cannot be loaded
+      />
+    );
+  } else {
+    return (
+      <WebView
+        injectedJavaScript={INJECTED_JAVASCRIPT}
+        forceDarkOn={true}
+        userAgent={UserAgent}
+        allowsFullscreenVideo={true}
+        onMessage={event => {}}
+        mixedContentMode="compatibility"
+        source={{uri: playUrl}}
+        style={{width: '100%', height: '100%'}}
+      />
+    );
+  }
+};
+
+const INJECTED_JAVASCRIPT = `
+      const videoUrl = new URL(document.querySelector('.MacPlayer table iframe').src).searchParams.get('url')
+      window.alert(videoUrl)
+      true; // note: this is required, or you'll sometimes get silent failures
+    `;
+
+export default connect(mapFromParserToProps, null)(Player);

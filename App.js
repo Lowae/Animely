@@ -6,12 +6,22 @@
  * @flow strict-local
  */
 
-import {NavigationContainer} from '@react-navigation/native';
-import React from 'react';
+import {
+  DarkTheme as NavigationDarkTheme,
+  DefaultTheme as NavigationDefaultTheme,
+  NavigationContainer,
+} from '@react-navigation/native';
+import * as React from 'react';
 
-import {DefaultTheme, Provider as PaperProvider} from 'react-native-paper';
+import {
+  adaptNavigationTheme,
+  DefaultTheme,
+  Provider as PaperProvider,
+} from 'react-native-paper';
+import {Provider as ReduxProvider} from 'react-redux';
 import Navigation from './src/Navigations';
 import {MD3Theme} from 'react-native-paper';
+import store from './src/redux/Store';
 
 export const DefaultLightTheme: MD3Theme = {
   dark: false,
@@ -109,22 +119,39 @@ const DefaultDarkTheme: MD3Theme = {
   },
 };
 
-export default class App extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      isDarkMode: false,
-      theme: this.isDarkMode ? DefaultDarkTheme : DefaultLightTheme,
-    };
-  }
+const {LightTheme, DarkTheme} = adaptNavigationTheme({
+  reactNavigationLight: NavigationDefaultTheme,
+  reactNavigationDark: NavigationDarkTheme,
+});
 
-  render() {
-    return (
-      <PaperProvider theme={DefaultTheme}>
-        <NavigationContainer>
-          <Navigation theme={this.state.theme} />
+const CombinedDefaultTheme = {
+  ...DefaultLightTheme,
+  ...LightTheme,
+  colors: {
+    ...DefaultLightTheme.colors,
+    ...LightTheme.colors,
+  },
+};
+
+const CombinedDarkTheme = {
+  ...DefaultDarkTheme,
+  ...DarkTheme,
+  colors: {
+    ...DefaultDarkTheme.colors,
+    ...DarkTheme.colors,
+  },
+};
+
+export default function App() {
+  const [isDarkMode, setIsDarkMode] = React.useState(false);
+  const combinedTheme = isDarkMode ? CombinedDarkTheme : CombinedDefaultTheme;
+  return (
+    <ReduxProvider store={store}>
+      <PaperProvider theme={combinedTheme}>
+        <NavigationContainer theme={combinedTheme}>
+          <Navigation theme={combinedTheme} />
         </NavigationContainer>
       </PaperProvider>
-    );
-  }
+    </ReduxProvider>
+  );
 }

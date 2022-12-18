@@ -4,7 +4,6 @@ import {
   View,
   StyleSheet,
   StatusBar,
-  ImageBackground,
   SectionList,
   FlatList,
   TouchableOpacity,
@@ -13,23 +12,24 @@ import {
 } from 'react-native';
 import Swiper from 'react-native-swiper';
 
-import {HomeParser} from '../../utils/yinghua/Parser.js';
-import {ScreenWidth, ScreenHeight} from '../../utils/screens/ScreenUtils';
-import AnimeItem, {renderAnime} from '../animes/AnimeItem';
+import {ScreenHeight} from '../../utils/screens/ScreenUtils';
+import AnimeItem from '../animes/AnimeItem';
 import {gotoDetails, gotoSearch, gotoSetting} from '../../Navigations';
-import {ActivityIndicator, Appbar, TouchableRipple} from 'react-native-paper';
+import {ActivityIndicator, Appbar} from 'react-native-paper';
+import {connect} from 'react-redux';
+import {mapFromParserToProps} from '../../redux/reducers/DataSource';
 
-export default class Home extends React.Component {
+class Home extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       banners: [],
       groups: [],
     };
-    HomeParser.then(result => {
+    this.props.source.parser.homeParser.then(result => {
       this.setState({
-        banners: result.banners,
-        groups: result.groups,
+        banners: result.banner,
+        groups: result.group,
       });
     });
   }
@@ -142,10 +142,12 @@ export default class Home extends React.Component {
           <Appbar.Action
             color={theme.colors.onBackground}
             icon="menu"
-            onPress={() => {}}
+            onPress={() => {
+              navigation.openDrawer();
+            }}
           />
           <Appbar.Content
-            title="Animely"
+            title={'Animely'}
             color={theme.colors.onBackground}
             style={{marginStart: 8}}
           />
@@ -231,3 +233,5 @@ class AnimeSections extends React.Component {
 const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: '#f5f5f5'},
 });
+
+export default connect(mapFromParserToProps, null)(Home);

@@ -10,14 +10,15 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {DetailParser} from '../../utils/yinghua/Parser';
 import {ScreenWidth} from '../../utils/screens/ScreenUtils';
-import {gotoTagPage} from '../../Navigations';
+import {gotoPlayer, gotoTagPage} from '../../Navigations';
 import {ActivityIndicator, Appbar, Chip} from 'react-native-paper';
 import {FlatGrid} from 'react-native-super-grid';
 import ReadMore from '@fawazahmed/react-native-read-more';
+import {connect} from 'react-redux';
+import {mapFromParserToProps} from '../../redux/reducers/DataSource';
 
-export default class Detail extends React.Component {
+class Detail extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -30,18 +31,14 @@ export default class Detail extends React.Component {
     };
     const {route} = this.props;
     const {detailUrl} = route.params;
-    DetailParser(detailUrl).then(result => {
+    this.props.source.parser.detailParser(detailUrl).then(result => {
       this.setState(result);
       return result;
     });
   }
 
-  gotoPlayer(playUrl) {
-    const {navigation} = this.props;
-    navigation.navigate('Player', {playUrl: playUrl});
-  }
-
   renderEpisode(item) {
+    const {navigation} = this.props;
     return (
       <Chip
         compact={true}
@@ -49,7 +46,7 @@ export default class Detail extends React.Component {
         theme={this.props.theme}
         elevated
         style={{padding: 0, height: 36, justifyContent: 'center'}}
-        onPress={() => this.gotoPlayer(item.playUrl)}>
+        onPress={() => gotoPlayer(navigation, item.playUrl)}>
         {item.episode}
       </Chip>
     );
@@ -186,3 +183,5 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
 });
+
+export default connect(mapFromParserToProps, null)(Detail);
