@@ -16,8 +16,7 @@ import {ScreenHeight} from '../../utils/screens/ScreenUtils';
 import AnimeItem from '../animes/AnimeItem';
 import {gotoDetails, gotoSearch, gotoSetting} from '../../Navigations';
 import {ActivityIndicator, Appbar} from 'react-native-paper';
-import {connect} from 'react-redux';
-import {mapFromParserToProps} from '../../redux/reducers/DataSource';
+import {getCurrentParserSource} from '../../redux/reducers/DataSource';
 
 class Home extends React.Component {
   constructor(props) {
@@ -26,7 +25,7 @@ class Home extends React.Component {
       banners: [],
       groups: [],
     };
-    this.props.source.parser.homeParser.then(result => {
+    getCurrentParserSource().parser.homeParser.then(result => {
       this.setState({
         banners: result.banner,
         groups: result.group,
@@ -95,8 +94,7 @@ class Home extends React.Component {
                 activeOpacity={0.85}>
                 <Image
                   style={{
-                    height: '100%',
-                    justifyContent: 'flex-end',
+                    height: ScreenHeight * 0.25,
                   }}
                   resizeMode="cover"
                   source={{uri: item.image}}
@@ -234,4 +232,4 @@ const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: '#f5f5f5'},
 });
 
-export default connect(mapFromParserToProps, null)(Home);
+export default Home;

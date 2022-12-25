@@ -2,11 +2,7 @@ import React from 'react';
 import {SafeAreaView, View} from 'react-native';
 import {ActivityIndicator, Appbar, Searchbar} from 'react-native-paper';
 import AnimeList from './AnimeList';
-import {connect} from 'react-redux';
-import {
-  mapFromParserToProps,
-  mapSourceToParserProps,
-} from '../../redux/reducers/DataSource';
+import {getCurrentParserSource} from '../../redux/reducers/DataSource';
 
 class Animes extends React.Component {
   constructor(props) {
@@ -18,14 +14,16 @@ class Animes extends React.Component {
     };
     const {route} = this.props;
     const {tagUrl} = route.params;
-    this.props.source.parser.pageParser(tagUrl).then(result => {
-      this.setState({
-        isLoadFinished: true,
-        title: result.title,
-        data: result.data,
+    getCurrentParserSource()
+      .parser.pageParser(tagUrl)
+      .then(result => {
+        this.setState({
+          isLoadFinished: true,
+          title: result.title,
+          data: result.data,
+        });
+        return result;
       });
-      return result;
-    });
   }
 
   render() {
@@ -63,4 +61,4 @@ class Animes extends React.Component {
     );
   }
 }
-export default connect(mapFromParserToProps, null)(Animes);
+export default Animes;

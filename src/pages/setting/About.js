@@ -1,4 +1,4 @@
-import {View} from 'react-native';
+import {View, Linking} from 'react-native';
 import {Appbar, List, Text} from 'react-native-paper';
 import DialogWithLongText from '../../components/DialogWithLongText';
 import React, {useEffect} from 'react';
@@ -34,7 +34,9 @@ const About = ({navigation, theme}) => {
         left={props => <List.Icon {...props} icon="alert-box" />}
       />
       <List.Item
-        onPress={() => {}}
+        onPress={() => {
+          Linking.openURL('https://github.com/Lowae/Animely');
+        }}
         theme={theme}
         title="Github"
         description="https://github.com/Lowae/Animely"

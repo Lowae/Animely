@@ -15,8 +15,7 @@ import {gotoPlayer, gotoTagPage} from '../../Navigations';
 import {ActivityIndicator, Appbar, Chip} from 'react-native-paper';
 import {FlatGrid} from 'react-native-super-grid';
 import ReadMore from '@fawazahmed/react-native-read-more';
-import {connect} from 'react-redux';
-import {mapFromParserToProps} from '../../redux/reducers/DataSource';
+import {getCurrentParserSource} from '../../redux/reducers/DataSource';
 
 class Detail extends React.Component {
   constructor(props) {
@@ -31,10 +30,12 @@ class Detail extends React.Component {
     };
     const {route} = this.props;
     const {detailUrl} = route.params;
-    this.props.source.parser.detailParser(detailUrl).then(result => {
-      this.setState(result);
-      return result;
-    });
+    getCurrentParserSource()
+      .parser.detailParser(detailUrl)
+      .then(result => {
+        this.setState(result);
+        return result;
+      });
   }
 
   renderEpisode(item) {
@@ -184,4 +185,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default connect(mapFromParserToProps, null)(Detail);
+export default Detail;

@@ -2,19 +2,14 @@ import WebView from 'react-native-webview';
 import {UserAgent} from '../../utils/http/HttpUtils';
 import React, {useEffect} from 'react';
 import {StatusBar, View} from 'react-native';
-import {
-  ActivityIndicator,
-  Appbar,
-  ProgressBar,
-  Snackbar,
-} from 'react-native-paper';
+import {Appbar, ProgressBar, Snackbar} from 'react-native-paper';
 import {gotoPlayer, gotoSetting} from '../../Navigations';
 import BackHandler from 'react-native/Libraries/Utilities/BackHandler';
-import {connect} from 'react-redux';
-import {mapFromWebToProps} from '../../redux/reducers/DataSource';
+import {getCurrentWebSource} from '../../redux/reducers/DataSource';
 
 const Web = props => {
-  const {source, theme, navigation} = props;
+  const {theme, navigation} = props;
+  const source = getCurrentWebSource();
   const [currentUrl, setCurrentUrl] = React.useState(source.url);
   const [navState, setNavState] = React.useState(null);
   const [videoUrl, setVideoUrl] = React.useState('');
@@ -49,11 +44,13 @@ const Web = props => {
       return;
     }
     setCurrentUrl(navUrl);
-    if (!navUrl.includes('malimali')) {
+    if (!navUrl.includes(source.host)) {
       webviewRef.current.stopLoading();
       webviewRef.current.goBack();
     }
   };
+
+  console.log(source.injectedScript);
 
   return (
     <View style={{flex: 1, backgroundColor: theme.colors.background}}>
@@ -107,7 +104,8 @@ const Web = props => {
       </Appbar>
       <WebView
         ref={webviewRef}
-        injectedJavaScript={INJECTED_JAVASCRIPT}
+        javaScriptEnabled={true}
+        injectedJavaScript={source.injectedScript}
         onNavigationStateChange={handleWebViewNavigationStateChange}
         userAgent={UserAgent}
         startInLoadingState={true}
@@ -120,10 +118,10 @@ const Web = props => {
         )}
         allowsFullscreenVideo={true}
         onMessage={event => {
-          console.log('onMessage: ' + JSON.stringify(event.nativeEvent));
+          console.log('onMessage: ' + encodeURI(event.nativeEvent.data));
           const parsedUrl = event.nativeEvent.data;
           if (parsedUrl.split('.').pop() === 'm3u8') {
-            setVideoUrl(parsedUrl);
+            setVideoUrl(encodeURI(parsedUrl));
             setSnackBarVisible(true);
           }
         }}
@@ -144,6 +142,7 @@ const Web = props => {
         onDismiss={() => {
           setSnackBarVisible(false);
         }}
+        onIconPress={() => setSnackBarVisible(false)}
         action={{
           label: 'GO',
           onPress: () => {
@@ -152,16 +151,10 @@ const Web = props => {
           },
         }}
         duration={Snackbar.DURATION_MEDIUM}>
-        解析到视频链接，是否跳转至内置播放器?
+        是否跳转至内置播放器播放?
       </Snackbar>
     </View>
   );
 };
 
-const INJECTED_JAVASCRIPT = `
-      const videoUrl = new URL(document.querySelector('.MacPlayer table iframe').src).searchParams.get('url')
-      window.ReactNativeWebView.postMessage(videoUrl)
-      true; // note: this is required, or you'll sometimes get silent failures
-    `;
-
-export default connect(mapFromWebToProps, null)(Web);
+export default Web;

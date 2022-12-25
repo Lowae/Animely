@@ -1,8 +1,7 @@
 import React from 'react';
 import {View, StyleSheet, Alert} from 'react-native';
 import Video from 'react-native-video';
-import {connect} from 'react-redux';
-import {mapFromParserToProps} from '../../redux/reducers/DataSource';
+import {getCurrentParserSource} from '../../redux/reducers/DataSource';
 import WebView from 'react-native-webview';
 import {UserAgent} from '../../utils/http/HttpUtils';
 
@@ -22,12 +21,14 @@ class Player extends React.Component {
         playUrl: originUrl,
       });
     } else {
-      this.props.source.parser.videoParser(originUrl).then(result => {
-        this.setState({
-          playUrl: result.playUrl,
+      getCurrentParserSource()
+        .parser.videoParser(originUrl)
+        .then(result => {
+          this.setState({
+            playUrl: result.playUrl,
+          });
+          return result;
         });
-        return result;
-      });
     }
   }
 
@@ -84,4 +85,4 @@ const INJECTED_JAVASCRIPT = `
       true; // note: this is required, or you'll sometimes get silent failures
     `;
 
-export default connect(mapFromParserToProps, null)(Player);
+export default Player;

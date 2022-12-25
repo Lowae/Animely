@@ -15,13 +15,10 @@ import * as React from 'react';
 
 import {
   adaptNavigationTheme,
-  DefaultTheme,
   Provider as PaperProvider,
 } from 'react-native-paper';
-import {Provider as ReduxProvider} from 'react-redux';
 import Navigation from './src/Navigations';
 import {MD3Theme} from 'react-native-paper';
-import store from './src/redux/Store';
 
 export const DefaultLightTheme: MD3Theme = {
   dark: false,
@@ -146,12 +143,10 @@ export default function App() {
   const [isDarkMode, setIsDarkMode] = React.useState(false);
   const combinedTheme = isDarkMode ? CombinedDarkTheme : CombinedDefaultTheme;
   return (
-    <ReduxProvider store={store}>
-      <PaperProvider theme={combinedTheme}>
-        <NavigationContainer theme={combinedTheme}>
-          <Navigation theme={combinedTheme} />
-        </NavigationContainer>
-      </PaperProvider>
-    </ReduxProvider>
+    <PaperProvider theme={combinedTheme}>
+      <NavigationContainer theme={combinedTheme}>
+        <Navigation theme={combinedTheme} />
+      </NavigationContainer>
+    </PaperProvider>
   );
 }

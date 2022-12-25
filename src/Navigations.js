@@ -14,8 +14,11 @@ import About from './pages/setting/About';
 import {StyleSheet} from 'react-native';
 import {useTheme, Drawer as PaperDrawer} from 'react-native-paper';
 import Web from './pages/web';
-import {connect} from 'react-redux';
-import {mapDispatchToProps} from './redux/reducers/DataSource';
+import {
+  getCurrentWebSource,
+  mapWebLabelToSource,
+} from './redux/reducers/DataSource';
+import {CommonActions, StackActions} from '@react-navigation/native';
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -115,10 +118,21 @@ const DrawerContent = props => {
       <PaperDrawer.Section title="番剧网页源">
         <PaperDrawer.Item
           active={drawerItemIndex === 1}
-          label={'嘛哩嘛哩'}
+          label={'AGE动漫'}
           onPress={() => {
             setDrawerItemIndex(1);
+            gotoWeb(navigation, 'AGE动漫');
+            mapWebLabelToSource('AGE动漫');
+          }}
+          style={{height: 36, marginBottom: 12}}
+        />
+        <PaperDrawer.Item
+          active={drawerItemIndex === 2}
+          label={'嘛哩嘛哩'}
+          onPress={() => {
+            setDrawerItemIndex(2);
             gotoWeb(navigation, '嘛哩嘛哩');
+            mapWebLabelToSource('嘛哩嘛哩');
           }}
           style={{height: 36, marginBottom: 12}}
         />
@@ -173,8 +187,17 @@ export function gotoPlayer(navigation, playUrl) {
   navigation.navigate('Player', {originUrl: playUrl});
 }
 
-export function gotoWeb(navigation, webUrl) {
-  navigation.navigate('Web', {label: webUrl});
+export function gotoWeb(navigation, label) {
+  if (label === getCurrentWebSource().label) {
+    navigation.navigate('Web');
+  } else {
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{name: 'Web'}],
+      }),
+    );
+  }
 }
 
 export function gotoSetting(navigation) {

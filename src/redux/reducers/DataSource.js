@@ -1,5 +1,4 @@
 import {createSlice} from '@reduxjs/toolkit';
-import Parser from '../../utils/parser/Parser';
 import YHDM_PARSER from '../../utils/parser/YHDM';
 
 const FromSource = {
@@ -12,64 +11,44 @@ const FromSource = {
   ],
   fromWeb: [
     {
+      label: 'AGE动漫',
+      host: 'agemys',
+      url: 'https://www.agemys.net/',
+      injectedScript: `
+      setTimeout(function() { 
+          const videoUrl = new URL(document.querySelector('iframe').src).searchParams.get('url');
+          window.ReactNativeWebView.postMessage(videoUrl);
+      }, 2000);
+      true;
+      `,
+    },
+    {
       label: '嘛哩嘛哩',
       host: 'malimali',
       url: 'https://www.malimali6.com/',
+      injectedScript: `
+      const videoUrl = new URL(document.querySelector('.MacPlayer table iframe').src).searchParams.get('url');
+      window.ReactNativeWebView.postMessage(videoUrl);
+      true;
+      `,
     },
   ],
 };
 
-const dataSourceSlice = createSlice({
-  name: 'PARSER',
-  initialState: {
-    fromParser: {
-      label: FromSource.fromParser[0].label,
-      source: FromSource.fromParser[0],
-    },
-    fromWeb: {
-      label: FromSource.fromWeb[0].label,
-      source: FromSource.fromWeb[0],
-    },
-  },
-  reducers: {
-    updateFromParserAction: (state, action) => {
-      state.fromParser = {
-        label: action.payload,
-        source: FromSource.fromParser.find(({label}) => {
-          return label === action.payload;
-        }),
-      };
-    },
-    updateFromWebAction: (state, action) => {
-      state.fromWeb = {
-        label: action.payload,
-        source: FromSource.fromWeb.find(({label}) => {
-          return label === action.payload;
-        }),
-      };
-    },
-  },
-});
+let currentParserSource = FromSource.fromParser[0];
+let currentWebSource = FromSource.fromWeb[0];
 
-export const {updateFromParserAction, updateFromWebAction} =
-  dataSourceSlice.actions;
-
-export const dataSourceReducer = dataSourceSlice.reducer;
-
-export const mapDispatchToProps = dispatch => {
-  return {
-    updateFromParser: label => dispatch(updateFromParserAction(label)),
-    updateFromWeb: label => dispatch(updateFromWebAction(label)),
-  };
+export const mapParserLabelToSource = fromLabel => {
+  currentParserSource = FromSource.fromParser.find(({label}) => {
+    return label === fromLabel;
+  });
 };
 
-export const mapFromParserToProps = state => {
-  return {
-    source: state.dataSource.fromParser.source,
-  };
+export const mapWebLabelToSource = fromLabel => {
+  currentWebSource = FromSource.fromWeb.find(({label}) => {
+    return label === fromLabel;
+  });
 };
-export const mapFromWebToProps = state => {
-  return {
-    source: state.dataSource.fromWeb.source,
-  };
-};
+
+export const getCurrentWebSource = () => currentWebSource;
+export const getCurrentParserSource = () => currentParserSource;

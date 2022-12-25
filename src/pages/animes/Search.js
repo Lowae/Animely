@@ -2,10 +2,9 @@ import {Alert, Keyboard, SafeAreaView} from 'react-native';
 import {ActivityIndicator, Appbar, Searchbar} from 'react-native-paper';
 import * as React from 'react';
 import AnimeList from './AnimeList';
-import {connect} from 'react-redux';
-import {mapFromParserToProps} from '../../redux/reducers/DataSource';
+import {getCurrentParserSource} from '../../redux/reducers/DataSource';
 
-const Search = ({navigation, theme, source}) => {
+const Search = ({navigation, theme}) => {
   const [query, setQuery] = React.useState('');
 
   const [searchResult, setSearchResult] = React.useState({
@@ -16,13 +15,15 @@ const Search = ({navigation, theme, source}) => {
 
   const SearchAction = keywords => {
     setIsSearching(true);
-    source.parser.searchParser('/search/' + keywords).then(r => {
-      setIsSearching(false);
-      setSearchResult({
-        title: r.title,
-        data: r.data,
+    getCurrentParserSource()
+      .parser.searchParser('/search/' + keywords)
+      .then(r => {
+        setIsSearching(false);
+        setSearchResult({
+          title: r.title,
+          data: r.data,
+        });
       });
-    });
   };
 
   return (
@@ -53,4 +54,4 @@ const Search = ({navigation, theme, source}) => {
   );
 };
 
-export default connect(mapFromParserToProps, null)(Search);
+export default Search;
